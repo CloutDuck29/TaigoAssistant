@@ -40,3 +40,21 @@ yes_no_menu = ReplyKeyboardMarkup(
     ],
     resize_keyboard=True
 )
+
+how_do_you_know_us = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="ВК"), KeyboardButton(text="Kwork")],
+        [KeyboardButton(text="Fiverr"), KeyboardButton(text="В интернете")],
+        [KeyboardButton(text="Посоветовали")]
+    ],
+    resize_keyboard=True
+)
+
+deadline = ReplyKeyboardMarkup(
+    keyboard=[
+        [KeyboardButton(text="Нет"), KeyboardButton(text="Не больше недели")],
+        [KeyboardButton(text="Не больше двух недель"), KeyboardButton(text="Не больше месяца")],
+        [KeyboardButton(text="Не больше трех месяцев")]
+    ],
+    resize_keyboard=True
+)
