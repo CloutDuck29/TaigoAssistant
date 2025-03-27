@@ -1,5 +1,6 @@
 from aiogram import types, Router
 from aiogram.fsm.context import FSMContext
+from aiogram.types import ReplyKeyboardRemove
 from bot.keyboards import project_type_menu, minecraft_menu, software_menu, main_menu
 from bot.states import OrderState
 from bot.loader import bot
@@ -24,3 +25,20 @@ async def process_project_type(message: types.Message, state: FSMContext):
         await state.set_state(OrderState.waiting_for_category)
     else:
         await message.answer("Пожалуйста, выберите один из типов проекта.", reply_markup=project_type_menu)
+
+@router.message(OrderState.waiting_for_category)
+async def process_build_category(message: types.Message, state: FSMContext):
+    category = message.text
+    if category == "Сборка":
+        await message.answer("📋 Введите название проекта:", reply_markup=ReplyKeyboardRemove())
+        await state.update_data(category=category)
+        await state.set_state(OrderState.waiting_for_name)
+
+    elif category == "Плагин":
+        await message.answer("📋 Введите название плагина:", reply_markup=ReplyKeyboardRemove())
+        await state.update_data(category=category)
+        await state.set_state(OrderState.waiting_for_namePlugin)
+
+
+    else:
+        await message.answer("Пожалуйста, выберите категорию.", reply_markup=minecraft_menu)

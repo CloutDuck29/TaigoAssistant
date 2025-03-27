@@ -1,5 +1,3 @@
-# bot/order_handlers/build_handler.py
-
 from aiogram import types, Router
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
@@ -10,19 +8,6 @@ from bot.config import GROUP_ID
 
 router = Router()
 
-
-@router.message(OrderState.waiting_for_category)
-async def process_build_category(message: types.Message, state: FSMContext):
-    category = message.text
-    if category == "Сборка":
-        await message.answer("📋 Введите название проекта:", reply_markup=ReplyKeyboardRemove())
-        await state.update_data(category=category)
-        await state.set_state(OrderState.waiting_for_name)
-    else:
-        await message.answer("Пожалуйста, выберите категорию.", reply_markup=minecraft_menu)
-
-
-# Новый вопрос 1: Название проекта
 @router.message(OrderState.waiting_for_name)
 async def process_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
@@ -30,7 +15,6 @@ async def process_name(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_version)
 
 
-# Новый вопрос 2: Версия проекта
 @router.message(OrderState.waiting_for_version)
 async def process_version(message: types.Message, state: FSMContext):
     await state.update_data(version=message.text)
@@ -38,7 +22,6 @@ async def process_version(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_socials)
 
 
-# Новый вопрос 3: Социальные сети
 @router.message(OrderState.waiting_for_socials)
 async def process_socials(message: types.Message, state: FSMContext):
     await state.update_data(socials=message.text)
@@ -46,7 +29,6 @@ async def process_socials(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_colors)
 
 
-# Новый вопрос 4: Цветовая гамма
 @router.message(OrderState.waiting_for_colors)
 async def process_colors(message: types.Message, state: FSMContext):
     await state.update_data(colors=message.text)
@@ -54,7 +36,6 @@ async def process_colors(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_mode)
 
 
-# Новый вопрос 5: Тип режима
 @router.message(OrderState.waiting_for_mode)
 async def process_mode(message: types.Message, state: FSMContext):
     await state.update_data(mode=message.text)
@@ -62,15 +43,13 @@ async def process_mode(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_functionality)
 
 
-# Новый вопрос 6: Описание функционала
 @router.message(OrderState.waiting_for_functionality)
 async def process_functionality(message: types.Message, state: FSMContext):
     await state.update_data(functionality=message.text)
-    await message.answer("Нужен ли кастомный спавн? (Да/Нет)", reply_markup=yes_no_menu)
+    await message.answer("Нужен ли кастомный спавн?", reply_markup=yes_no_menu)
     await state.set_state(OrderState.waiting_for_spawn)
 
 
-# Новый вопрос 7: Кастомный спавн
 @router.message(OrderState.waiting_for_spawn)
 async def process_spawn(message: types.Message, state: FSMContext):
     await state.update_data(spawn=message.text)
@@ -78,7 +57,6 @@ async def process_spawn(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_holograms)
 
 
-# Новый вопрос 8: Голограммы
 @router.message(OrderState.waiting_for_holograms)
 async def process_holograms(message: types.Message, state: FSMContext):
     await state.update_data(holograms=message.text)
@@ -86,7 +64,6 @@ async def process_holograms(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_plugins)
 
 
-# Новый вопрос 9: Самописные решения (плагины)
 @router.message(OrderState.waiting_for_plugins)
 async def process_plugins(message: types.Message, state: FSMContext):
     await state.update_data(plugins=message.text)
@@ -94,7 +71,6 @@ async def process_plugins(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_launcher)
 
 
-# Новый вопрос 10: Самописный лаунчер
 @router.message(OrderState.waiting_for_launcher)
 async def process_launcher(message: types.Message, state: FSMContext):
     await state.update_data(launcher=message.text)
@@ -102,7 +78,6 @@ async def process_launcher(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_icon)
 
 
-# Новый вопрос 11: Иконка проекта
 @router.message(OrderState.waiting_for_icon)
 async def process_icon(message: types.Message, state: FSMContext):
     await state.update_data(icon=message.text)
@@ -110,7 +85,6 @@ async def process_icon(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_donations)
 
 
-# Новый вопрос 12: Сайт авто-доната
 @router.message(OrderState.waiting_for_donations)
 async def process_donations(message: types.Message, state: FSMContext):
     await state.update_data(donations=message.text)
@@ -118,7 +92,6 @@ async def process_donations(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_additional)
 
 
-# Новый вопрос 13: Дополнительное описание
 @router.message(OrderState.waiting_for_additional)
 async def process_additional(message: types.Message, state: FSMContext):
     await state.update_data(additional=message.text)
@@ -126,7 +99,6 @@ async def process_additional(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_deadline)
 
 
-# Новый вопрос 14: Пожелания по срокам
 @router.message(OrderState.waiting_for_deadline)
 async def process_deadline(message: types.Message, state: FSMContext):
     await state.update_data(deadline=message.text)
@@ -134,7 +106,6 @@ async def process_deadline(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_support)
 
 
-# Новый вопрос 15: Коммерческая поддержка
 @router.message(OrderState.waiting_for_support)
 async def process_support(message: types.Message, state: FSMContext):
     await state.update_data(support=message.text)
@@ -142,32 +113,30 @@ async def process_support(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_source)
 
 
-# Новый вопрос 16: Источник информации
 @router.message(OrderState.waiting_for_source)
 async def process_source(message: types.Message, state: FSMContext):
     await state.update_data(source=message.text)
 
-    # После последнего вопроса отправим информацию в группу
     user_data = await state.get_data()
 
     await bot.send_message(
         GROUP_ID,
-        f"📢 Новый заказ на сборку!\n"
-        f"🔹 Название: {user_data['name']}\n"
-        f"🔹 Версия: {user_data['version']}\n"
-        f"🔹 Соц.сети: {user_data['socials']}\n"
-        f"🔹 Цветовая гамма: {user_data['colors']}\n"
-        f"🔹 Тип режима: {user_data['mode']}\n"
-        f"🔹 Функционал: {user_data['functionality']}\n"
-        f"🔹 Кастомный спавн: {user_data['spawn']}\n"
-        f"🔹 Голограммы: {user_data['holograms']}\n"
-        f"🔹 Плагины: {user_data['plugins']}\n"
-        f"🔹 Лаунчер: {user_data['launcher']}\n"
-        f"🔹 Иконка: {user_data['icon']}\n"
-        f"🔹 Сайт авто-доната: {user_data['donations']}\n"
-        f"🔹 Доп. описание: {user_data['additional']}\n"
-        f"🔹 Сроки: {user_data['deadline']}\n"
-        f"🔹 Коммерческая поддержка: {user_data['support']}\n"
+        f"📢 Новый заказ на сборку!\n\n"
+        f"🔹 Название:\n — {user_data['name']}\n"
+        f"🔹 Версия:\n — {user_data['version']}\n"
+        f"🔹 Соц.сети:\n — {user_data['socials']}\n"
+        f"🔹 Цветовая гамма:\n — {user_data['colors']}\n"
+        f"🔹 Тип режима:\n — {user_data['mode']}\n"
+        f"🔹 Функционал:\n — {user_data['functionality']}\n"
+        f"🔹 Кастомный спавн:\n — {user_data['spawn']}\n"
+        f"🔹 Голограммы:\n — {user_data['holograms']}\n"
+        f"🔹 Плагины:\n — {user_data['plugins']}\n"
+        f"🔹 Лаунчер:\n — {user_data['launcher']}\n"
+        f"🔹 Иконка:\n — {user_data['icon']}\n"
+        f"🔹 Сайт авто-доната:\n — {user_data['donations']}\n"
+        f"🔹 Доп. описание:\n — {user_data['additional']}\n"
+        f"🔹 Сроки:\n — {user_data['deadline']}\n"
+        f"🔹 Коммерческая поддержка:\n — {user_data['support']}\n\n"
         f"Заказчик: {message.from_user.full_name} (@{message.from_user.username or 'Без юзернейма'})"
     )
     await message.answer("✅ Ваш заказ на сборку принят!", reply_markup=main_menu)
