@@ -39,6 +39,9 @@ async def process_build_category(message: types.Message, state: FSMContext):
         await state.update_data(category=category)
         await state.set_state(OrderState.waiting_for_namePlugin)
 
-
+    elif category == "Лаунчер":
+        await message.answer("📋 Введите название лаунчера:", reply_markup=ReplyKeyboardRemove())
+        await state.update_data(category=category)
+        await state.set_state(OrderState.waiting_for_nameLauncher)
     else:
         await message.answer("Пожалуйста, выберите категорию.", reply_markup=minecraft_menu)
