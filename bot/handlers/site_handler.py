@@ -8,13 +8,13 @@ from bot.config import GROUP_ID
 
 router = Router()
 
-@router.message(OrderState.waiting_for_nameLauncher)
-async def process_name_launcher(message: types.Message, state: FSMContext):
+@router.message(OrderState.waiting_for_nameSite)
+async def process_name_site(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
-    await message.answer("Введите версию лаунчера")
-    await state.set_state(OrderState.waiting_for_versionLauncher)
+    await message.answer("Укажите свой домен (при наличии)")
+    await state.set_state(OrderState.waiting_for_siteDomain)
 
-@router.message(OrderState.waiting_for_versionLauncher)
+@router.message(OrderState.waiting_for_siteDomain)
 async def process_version(message: types.Message, state: FSMContext):
     await state.update_data(version=message.text)
     await message.answer("Укажите функционал лаунчера и какие задачи он должен решать")

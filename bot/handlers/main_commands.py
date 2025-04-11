@@ -1,6 +1,6 @@
 from aiogram import types, Router
 from aiogram.filters import Command
-from bot.keyboards import main_menu
+from bot.keyboards import main_menu, info_menu
 
 router = Router()
 
@@ -20,7 +20,7 @@ async def info_button(message: types.Message):
     await message.answer(
         "📌 TaigoStudio – команда профессионалов, создающих Minecraft-серверы, моды, лаунчеры и сайты.\n\n"
         "🔹 Мы работаем с 2021 года и сотрудничаем с клиентами по всему миру! 🌍",
-        parse_mode="Markdown"
+        reply_markup=info_menu
     )
 
 @router.message(lambda message: message.text == "🎨 Портфолио")

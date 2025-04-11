@@ -11,35 +11,35 @@ router = Router()
 @router.message(OrderState.waiting_for_name)
 async def process_name(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
-    await message.answer("Введите версию проекта:")
+    await message.answer("Введите версию проекта")
     await state.set_state(OrderState.waiting_for_version)
 
 
 @router.message(OrderState.waiting_for_version)
 async def process_version(message: types.Message, state: FSMContext):
     await state.update_data(version=message.text)
-    await message.answer("Укажите соц.сети проекта:")
+    await message.answer("Укажите соц.сети проекта")
     await state.set_state(OrderState.waiting_for_socials)
 
 
 @router.message(OrderState.waiting_for_socials)
 async def process_socials(message: types.Message, state: FSMContext):
     await state.update_data(socials=message.text)
-    await message.answer("Цветовая гамма Вашего проекта:")
+    await message.answer("Цветовая гамма Вашего проекта")
     await state.set_state(OrderState.waiting_for_colors)
 
 
 @router.message(OrderState.waiting_for_colors)
 async def process_colors(message: types.Message, state: FSMContext):
     await state.update_data(colors=message.text)
-    await message.answer("Тип режима (Анархия, БедВарс и т.д):")
+    await message.answer("Тип режима (Анархия, БедВарс и т.д)")
     await state.set_state(OrderState.waiting_for_mode)
 
 
 @router.message(OrderState.waiting_for_mode)
 async def process_mode(message: types.Message, state: FSMContext):
     await state.update_data(mode=message.text)
-    await message.answer("Опишите функционал Вашего режима (в чем его смысл, и какие функции должны быть):")
+    await message.answer("Опишите функционал Вашего режима (в чем его смысл, и какие функции должны быть)")
     await state.set_state(OrderState.waiting_for_functionality)
 
 
@@ -53,7 +53,7 @@ async def process_functionality(message: types.Message, state: FSMContext):
 @router.message(OrderState.waiting_for_spawn)
 async def process_spawn(message: types.Message, state: FSMContext):
     await state.update_data(spawn=message.text)
-    await message.answer("Опишите, какие голограммы должны быть на сервере:", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Опишите, какие голограммы должны быть на сервере", reply_markup=ReplyKeyboardRemove())
     await state.set_state(OrderState.waiting_for_holograms)
 
 
@@ -67,14 +67,14 @@ async def process_holograms(message: types.Message, state: FSMContext):
 @router.message(OrderState.waiting_for_plugins)
 async def process_plugins(message: types.Message, state: FSMContext):
     await state.update_data(plugins=message.text)
-    await message.answer("Укажите, нужно ли создать самописный лаунчер под Ваш проект:", reply_markup=yes_no_menu)
+    await message.answer("Укажите, нужно ли создать самописный лаунчер под Ваш проект", reply_markup=yes_no_menu)
     await state.set_state(OrderState.waiting_for_launcher)
 
 
 @router.message(OrderState.waiting_for_launcher)
 async def process_launcher(message: types.Message, state: FSMContext):
     await state.update_data(launcher=message.text)
-    await message.answer("Прикрепите иконку для Вашего проекта (ссылкой):", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Прикрепите иконку для Вашего проекта (ссылкой)", reply_markup=ReplyKeyboardRemove())
     await state.set_state(OrderState.waiting_for_icon)
 
 
@@ -88,7 +88,7 @@ async def process_icon(message: types.Message, state: FSMContext):
 @router.message(OrderState.waiting_for_donations)
 async def process_donations(message: types.Message, state: FSMContext):
     await state.update_data(donations=message.text)
-    await message.answer("Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд:", reply_markup=ReplyKeyboardRemove())
+    await message.answer("Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд", reply_markup=ReplyKeyboardRemove())
     await state.set_state(OrderState.waiting_for_additional)
 
 

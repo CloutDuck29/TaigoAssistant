@@ -11,19 +11,19 @@ router = Router()
 @router.message(OrderState.waiting_for_namePlugin)
 async def process_name_plugin(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
-    await message.answer("Введите ядро плагина:")
+    await message.answer("Введите ядро плагина")
     await state.set_state(OrderState.waiting_for_jarPlugin)
 
 @router.message(OrderState.waiting_for_jarPlugin)
 async def process_version(message: types.Message, state: FSMContext):
     await state.update_data(jar=message.text)
-    await message.answer("Укажите версию плагина:")
+    await message.answer("Укажите версию плагина")
     await state.set_state(OrderState.waiting_for_versionPlugin)
 
 @router.message(OrderState.waiting_for_versionPlugin)
 async def process_socials(message: types.Message, state: FSMContext):
     await state.update_data(version=message.text)
-    await message.answer("Укажите функционал плагина и плагина какие задачи он должен решать:")
+    await message.answer("Укажите функционал плагина и плагина какие задачи он должен решать")
     await state.set_state(OrderState.waiting_for_funcPlugin)
 
 @router.message(OrderState.waiting_for_funcPlugin)
@@ -71,15 +71,15 @@ async def process_source_plugin(message: types.Message, state: FSMContext):
     await bot.send_message(
         GROUP_ID,
         f"📢 Новый заказ на плагин!\n\n"
-        f"🔹 Название:\n — {user_data['name']}\n"
-        f"🔹 Ядро:\n — {user_data['jar']}\n"
-        f"🔹 Версия:\n — {user_data['version']}\n"
-        f"🔹 Функционал и задачи плагина:\n — {user_data['functional']}\n"
-        f"🔹 Вспомогательные системы/библиотеки:\n — {user_data['addons']}\n"
-        f"🔹 Примеры:\n — {user_data['examples']}\n"
-        f"🔹 Дополнительная информация:\n — {user_data['extrainfo']}\n"
-        f"🔹 Сроки:\n — {user_data['deadlines']}\n"
-        f"🔹 Откуда узнали о нас:\n — {user_data['source']}\n\n"
+        f"🔸 Название:\n — {user_data['name']}\n"
+        f"🔸 Ядро:\n — {user_data['jar']}\n"
+        f"🔸 Версия:\n — {user_data['version']}\n"
+        f"🔸 Функционал и задачи плагина:\n — {user_data['functional']}\n"
+        f"🔸 Вспомогательные системы/библиотеки:\n — {user_data['addons']}\n"
+        f"🔸 Примеры:\n — {user_data['examples']}\n"
+        f"🔸 Дополнительная информация:\n — {user_data['extrainfo']}\n"
+        f"🔸 Сроки:\n — {user_data['deadlines']}\n"
+        f"🔸 Откуда узнали о нас:\n — {user_data['source']}\n\n"
         f"Заказчик: {message.from_user.full_name} (@{message.from_user.username or 'Без юзернейма'})"
     )
     await message.answer("✅ Ваш заказ на плагин принят!", reply_markup=main_menu)

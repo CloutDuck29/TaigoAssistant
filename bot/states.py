@@ -3,6 +3,7 @@ from aiogram.fsm.state import State, StatesGroup
 class OrderState(StatesGroup):
     waiting_for_project_type = State()  # добавьте это состояние
     waiting_for_category = State()
+    waiting_for_po = State()
     waiting_for_name = State()
     waiting_for_version = State()
     waiting_for_socials = State()
@@ -53,3 +54,13 @@ class OrderState(StatesGroup):
     waiting_for_extraInfoBuild = State()
     waiting_for_deadlineBuild = State()
     waiting_for_sourceBuild = State()
+    waiting_for_nameSite = State()
+    waiting_for_siteDomain = State()
+    waiting_for_funcSite = State()
+    waiting_for_addonsSite = State()
+    waiting_for_examplesSite = State()
+    waiting_for_linksSite = State()
+    waiting_for_designSite = State()
+    waiting_for_extraInfoSite = State()
+    waiting_for_deadlineSite = State()
+    waiting_for_sourceSite = State()
