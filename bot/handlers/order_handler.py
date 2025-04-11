@@ -43,5 +43,11 @@ async def process_build_category(message: types.Message, state: FSMContext):
         await message.answer("📋 Введите название лаунчера:", reply_markup=ReplyKeyboardRemove())
         await state.update_data(category=category)
         await state.set_state(OrderState.waiting_for_nameLauncher)
+
+    elif category == "Постройка":
+        await message.answer("📋 Введите требуемый тип постройки:", reply_markup=ReplyKeyboardRemove())
+        await state.update_data(category=category)
+        await state.set_state(OrderState.waiting_for_typeBuild)
+
     else:
         await message.answer("Пожалуйста, выберите категорию.", reply_markup=minecraft_menu)
