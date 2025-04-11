@@ -37,12 +37,17 @@ async def process_addons(message: types.Message, state: FSMContext):
 async def process_examples(message: types.Message, state: FSMContext):
     await state.update_data(examples=message.text)
     await message.answer("Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд, необходимое Вашему проекту")
-    await state.set_state(OrderState.waiting_for_extraInfoLauncher)
+    await state.set_state(OrderState.waiting_for_designLauncher)
 
+@router.message(OrderState.waiting_for_designLauncher)
+async def process_design(message: types.Message, state: FSMContext):
+    await state.update_data(extra=message.text)
+    await message.answer("Предоставьте ссылку на дизайн (если имеется) или укажите, что дизайн нужно разработать")
+    await state.set_state(OrderState.waiting_for_extraInfoLauncher)
 
 @router.message(OrderState.waiting_for_extraInfoLauncher)
 async def process_extra(message: types.Message, state: FSMContext):
-    await state.update_data(extra=message.text)
+    await state.update_data(design=message.text)
     await message.answer("Есть ли у Вас пожелания по поводу сроков?", reply_markup=deadline)
     await state.set_state(OrderState.waiting_for_deadlineLauncher)
 
@@ -62,13 +67,14 @@ async def process_source_launcher(message: types.Message, state: FSMContext):
 
     await bot.send_message(
         GROUP_ID,
-        f"📢 1Новый заказ на плагин!\n\n"
+        f"📢 Новый заказ на лаунчер!\n\n"
         f"🔹 Название:\n — {user_data['name']}\n"
-        f"🔹 Версия и ядро:\n — {user_data['version']}\n"
+        f"🔹 Версия:\n — {user_data['version']}\n"
         f"🔹 Функционал лаунчера:\n — {user_data['func']}\n"
         f"🔹 Вспомогательные системы:\n — {user_data['addons']}\n"
         f"🔹 Примеры:\n — {user_data['examples']}\n"
         f"🔹 Дополнительная информация:\n — {user_data['extra']}\n"
+        f"🔹 Дизайн:\n — {user_data['design']}\n"
         f"🔹 Сроки:\n — {user_data['dead']}\n"
         f"🔹 Откуда узнали о нас:\n — {user_data['source']}\n"
         f"Заказчик: {message.from_user.full_name} (@{message.from_user.username or 'Без юзернейма'})"
