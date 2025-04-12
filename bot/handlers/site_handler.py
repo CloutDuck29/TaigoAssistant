@@ -15,70 +15,87 @@ async def process_name_site(message: types.Message, state: FSMContext):
     await state.set_state(OrderState.waiting_for_siteDomain)
 
 @router.message(OrderState.waiting_for_siteDomain)
-async def process_version(message: types.Message, state: FSMContext):
-    await state.update_data(version=message.text)
-    await message.answer("Укажите функционал лаунчера и какие задачи он должен решать")
-    await state.set_state(OrderState.waiting_for_funcLauncher)
+async def process_domain(message: types.Message, state: FSMContext):
+    await state.update_data(domain=message.text)
+    await message.answer("Укажите какие страницы должны быть на сайте и их описание")
+    await state.set_state(OrderState.waiting_for_layoutSite)
 
-@router.message(OrderState.waiting_for_funcLauncher)
+@router.message(OrderState.waiting_for_layoutSite)
+async def process_layout(message: types.Message, state: FSMContext):
+    await state.update_data(layout=message.text)
+    await message.answer("Укажите функционал сайта и какие задачи он должен решать")
+    await state.set_state(OrderState.waiting_for_funcSite)
+
+@router.message(OrderState.waiting_for_funcSite)
 async def process_func(message: types.Message, state: FSMContext):
     await state.update_data(func=message.text)
-    await message.answer("Укажите, есть ли вспомогательные системы, с которыми должен работать лаунчер (библиотеки, какие-то смежные плагины)")
-    await state.set_state(OrderState.waiting_for_addonsLauncher)
+    await message.answer("Укажите, есть ли вспомогательные системы, с которыми должен работать сайт")
+    await state.set_state(OrderState.waiting_for_addonsSite)
 
-@router.message(OrderState.waiting_for_addonsLauncher)
+@router.message(OrderState.waiting_for_addonsSite)
 async def process_addons(message: types.Message, state: FSMContext):
     await state.update_data(addons=message.text)
-    await message.answer("Предоставьте примеры лаунчеров наподобие, на которые мы могли бы ориентироваться (при наличии)")
-    await state.set_state(OrderState.waiting_for_examplesLauncher)
+    await message.answer("Предоставьте примеры сайтов наподобие, на которые мы могли бы ориентироваться (при наличии)")
+    await state.set_state(OrderState.waiting_for_examplesSite)
 
 
-@router.message(OrderState.waiting_for_examplesLauncher)
+@router.message(OrderState.waiting_for_examplesSite)
 async def process_examples(message: types.Message, state: FSMContext):
     await state.update_data(examples=message.text)
-    await message.answer("Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд, необходимое Вашему проекту")
-    await state.set_state(OrderState.waiting_for_designLauncher)
+    await message.answer("Предоставьте ссылку на дизайн (при наличии)")
+    await state.set_state(OrderState.waiting_for_designSite)
 
-@router.message(OrderState.waiting_for_designLauncher)
+@router.message(OrderState.waiting_for_designSite)
 async def process_design(message: types.Message, state: FSMContext):
-    await state.update_data(extra=message.text)
-    await message.answer("Предоставьте ссылку на дизайн (если имеется) или укажите, что дизайн нужно разработать")
-    await state.set_state(OrderState.waiting_for_extraInfoLauncher)
-
-@router.message(OrderState.waiting_for_extraInfoLauncher)
-async def process_extra(message: types.Message, state: FSMContext):
     await state.update_data(design=message.text)
+    await message.answer("Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд, необходимое Вашему проекту")
+    await state.set_state(OrderState.waiting_for_extraInfoSite)
+
+@router.message(OrderState.waiting_for_extraInfoSite)
+async def process_extra(message: types.Message, state: FSMContext):
+    await state.update_data(extra=message.text)
     await message.answer("Есть ли у Вас пожелания по поводу сроков?", reply_markup=deadline)
-    await state.set_state(OrderState.waiting_for_deadlineLauncher)
+    await state.set_state(OrderState.waiting_for_deadlineSite)
 
 
-@router.message(OrderState.waiting_for_deadlineLauncher)
+@router.message(OrderState.waiting_for_deadlineSite)
 async def process_dead(message: types.Message, state: FSMContext):
     await state.update_data(dead=message.text)
     await message.answer("Откуда Вы узнали о нашей студии?", reply_markup=how_do_you_know_us)
-    await state.set_state(OrderState.waiting_for_sourceLauncher)
+    await state.set_state(OrderState.waiting_for_sourceSite)
 
 
-@router.message(OrderState.waiting_for_sourceLauncher)
-async def process_source_launcher(message: types.Message, state: FSMContext):
+@router.message(OrderState.waiting_for_sourceSite)
+async def process_source_site(message: types.Message, state: FSMContext):
     await state.update_data(source=message.text)
 
     user_data = await state.get_data()
 
-    await bot.send_message(
-        GROUP_ID,
-        f"📢 Новый заказ на лаунчер!\n\n"
+    # Сформируем полный текст для отправки
+    full_text = (
+        f"📢 Новый заказ на сайт!\n\n"
         f"♦️ Название:\n — {user_data['name']}\n"
-        f"♦️ Версия:\n — {user_data['version']}\n"
-        f"♦️ Функционал лаунчера:\n — {user_data['func']}\n"
+        f"♦️ Желаемый домен:\n — {user_data['domain']}\n"
+        f"♦️ Страницы сайта:\n — {user_data['layout']}\n"
+        f"♦️ Функционал сайта:\n — {user_data['func']}\n"
         f"♦️ Вспомогательные системы:\n — {user_data['addons']}\n"
         f"♦️ Примеры:\n — {user_data['examples']}\n"
-        f"♦️ Дополнительная информация:\n — {user_data['extra']}\n"
         f"♦️ Дизайн:\n — {user_data['design']}\n"
+        f"♦️ Дополнительная информация:\n — {user_data['extra']}\n"
         f"♦️ Сроки:\n — {user_data['dead']}\n"
         f"♦️ Откуда узнали о нас:\n — {user_data['source']}\n"
         f"Заказчик: {message.from_user.full_name} (@{message.from_user.username or 'Без юзернейма'})"
     )
-    await message.answer("✅ Ваш заказ на лаунчер принят!", reply_markup=main_menu)
+
+    # Используем безопасную отправку сообщения
+    await safe_send_message(GROUP_ID, full_text)
+
+    await message.answer("✅ Ваш заказ на сайт принят!", reply_markup=main_menu)
 
     await state.clear()
+
+
+async def safe_send_message(chat_id: int, text: str):
+    max_length = 4096
+    for i in range(0, len(text), max_length):
+        await bot.send_message(chat_id, text[i:i + max_length])

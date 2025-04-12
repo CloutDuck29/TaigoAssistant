@@ -58,6 +58,7 @@ class OrderState(StatesGroup):
     waiting_for_siteDomain = State()
     waiting_for_funcSite = State()
     waiting_for_addonsSite = State()
+    waiting_for_layoutSite = State()
     waiting_for_examplesSite = State()
     waiting_for_linksSite = State()
     waiting_for_designSite = State()

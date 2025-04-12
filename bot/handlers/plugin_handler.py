@@ -23,7 +23,7 @@ async def process_version(message: types.Message, state: FSMContext):
 @router.message(OrderState.waiting_for_versionPlugin)
 async def process_socials(message: types.Message, state: FSMContext):
     await state.update_data(version=message.text)
-    await message.answer("Укажите функционал плагина и плагина какие задачи он должен решать")
+    await message.answer("Укажите функционал плагина и какие задачи он должен решать")
     await state.set_state(OrderState.waiting_for_funcPlugin)
 
 @router.message(OrderState.waiting_for_funcPlugin)
