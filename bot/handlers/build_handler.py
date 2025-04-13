@@ -1,87 +1,58 @@
 from aiogram import types, Router
-from aiogram.types import ReplyKeyboardRemove
 from aiogram.fsm.context import FSMContext
 from bot.keyboards import minecraft_menu, yes_no_menu, main_menu, how_do_you_know_us, deadline
 from bot.states import OrderState
 from bot.loader import bot
+from aiogram.types import ReplyKeyboardRemove
 from bot.config import GROUP_ID
 
 router = Router()
 
-@router.message(OrderState.waiting_for_typeBuild)
-async def process_type_build(message: types.Message, state: FSMContext):
-    await state.update_data(type=message.text)
-    await message.answer("Укажите версию, на которой необходимо строить")
-    await state.set_state(OrderState.waiting_for_versionBuild)
-
-@router.message(OrderState.waiting_for_versionBuild)
-async def process_version(message: types.Message, state: FSMContext):
-    await state.update_data(version=message.text)
-    await message.answer("Опишите, что именно Вы хотите видеть в постройке")
-    await state.set_state(OrderState.waiting_for_whatToBuild)
-
-@router.message(OrderState.waiting_for_whatToBuild)
-async def process_whattobuild(message: types.Message, state: FSMContext):
-    await state.update_data(build=message.text)
-    await message.answer("Укажите стиль постройки (хай-тек, модерн, и т.д)")
-    await state.set_state(OrderState.waiting_for_styleOfBuild)
-
-@router.message(OrderState.waiting_for_styleOfBuild)
-async def process_style(message: types.Message, state: FSMContext):
-    await state.update_data(style=message.text)
-    await message.answer("Укажите размерность Вашей постройки (в блоках, например 150х150)")
-    await state.set_state(OrderState.waiting_for_sizeOfBuild)
-
-
-@router.message(OrderState.waiting_for_sizeOfBuild)
-async def process_size(message: types.Message, state: FSMContext):
-    await state.update_data(size=message.text)
-    await message.answer("Укажите уровень детализации проекта (низкий, средний, высокий)")
-    await state.set_state(OrderState.waiting_for_detalizationOfBuild)
-
-@router.message(OrderState.waiting_for_detalizationOfBuild)
-async def process_detalization(message: types.Message, state: FSMContext):
-    await state.update_data(detalization=message.text)
-    await message.answer("Укажите сезон постройки (если он имеет место быть)")
-    await state.set_state(OrderState.waiting_for_sezonOfBuild)
-
-@router.message(OrderState.waiting_for_sezonOfBuild)
-async def process_sezon(message: types.Message, state: FSMContext):
-    await state.update_data(sezon=message.text)
-    await message.answer("Нужно ли расставлять точки для определенных локаций (укажите, где и сколько)")
-    await state.set_state(OrderState.waiting_for_pointsOfBuild)
+order_steps = {
+    'type': {"question": "Укажите версию, на которой необходимо строить",
+             "next_state": OrderState.waiting_for_versionBuild},
+    'version': {"question": "Опишите, что именно Вы хотите видеть в постройке",
+                "next_state": OrderState.waiting_for_whatToBuild},
+    'build': {"question": "Укажите стиль постройки (хай-тек, модерн, и т.д)",
+              "next_state": OrderState.waiting_for_styleOfBuild},
+    'style': {"question": "Укажите размерность Вашей постройки (в блоках, например 150х150)",
+              "next_state": OrderState.waiting_for_sizeOfBuild},
+    'size': {"question": "Укажите уровень детализации проекта (низкий, средний, высокий)",
+             "next_state": OrderState.waiting_for_detalizationOfBuild},
+    'detalization': {"question": "Укажите сезон постройки (если он имеет место быть)",
+                     "next_state": OrderState.waiting_for_sezonOfBuild},
+    'sezon': {"question": "Нужно ли расставлять точки для определенных локаций (укажите, где и сколько)",
+              "next_state": OrderState.waiting_for_pointsOfBuild},
+    'points': {
+        "question": "Предоставьте картинки построек наподобие, как примеры, на которые мы могли бы ориентироваться",
+        "next_state": OrderState.waiting_for_picturesOfBuild},
+    'pictures': {
+        "question": "Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд, необходимое Вашему проекту",
+        "next_state": OrderState.waiting_for_extraInfoBuild},
+    'extra': {"question": "Есть ли у Вас пожелания по поводу сроков?",
+              "next_state": OrderState.waiting_for_deadlineBuild, "keyboard": deadline},
+    'deadline': {"question": "Откуда Вы узнали о нас?", "next_state": OrderState.waiting_for_sourceBuild,
+                 "keyboard": how_do_you_know_us},
+    'source': {"question": None, "next_state": None}
+}
 
 
-@router.message(OrderState.waiting_for_pointsOfBuild)
-async def process_points(message: types.Message, state: FSMContext):
-    await state.update_data(points=message.text)
-    await message.answer("Предоставьте картинки построек наподобие, как примеры, на которые мы могли бы ориентироваться")
-    await state.set_state(OrderState.waiting_for_picturesOfBuild)
+async def process_order_step(message: types.Message, state: FSMContext, field: str):
+    await state.update_data({field: message.text})
 
-@router.message(OrderState.waiting_for_picturesOfBuild)
-async def process_pictures(message: types.Message, state: FSMContext):
-    await state.update_data(pictures=message.text)
-    await message.answer("Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд, необходимое Вашему проекту")
-    await state.set_state(OrderState.waiting_for_extraInfoBuild)
+    step_info = order_steps[field]
+    if step_info["question"]:
+        await message.answer(step_info["question"], reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
 
-@router.message(OrderState.waiting_for_extraInfoBuild)
-async def process_extra(message: types.Message, state: FSMContext):
-    await state.update_data(extra=message.text)
-    await message.answer("Есть ли у Вас пожелания по поводу сроков?", reply_markup=deadline)
-    await state.set_state(OrderState.waiting_for_deadlineBuild)
+    if step_info["next_state"]:
+        await state.set_state(step_info["next_state"])
+    else:
+        await complete_order(message, state)
 
-@router.message(OrderState.waiting_for_deadlineBuild)
-async def process_deadline(message: types.Message, state: FSMContext):
-    await state.update_data(deadline=message.text)
-    await message.answer("Откуда Вы узнали о нас?", reply_markup= how_do_you_know_us)
-    await state.set_state(OrderState.waiting_for_sourceBuild)
 
-@router.message(OrderState.waiting_for_sourceBuild)
-async def process_source_build(message: types.Message, state: FSMContext):
-    await state.update_data(source=message.text)
-
+async def complete_order(message: types.Message, state: FSMContext):
+    """Завершаем заказ и отправляем информацию в группу."""
     user_data = await state.get_data()
-
     await bot.send_message(
         GROUP_ID,
         f"📢 Новый заказ на постройку!\n\n"
@@ -96,10 +67,68 @@ async def process_source_build(message: types.Message, state: FSMContext):
         f"🔹 Примеры:\n — {user_data['pictures']}\n"
         f"🔹 Дополнительная информация:\n — {user_data['extra']}\n"
         f"🔹 Сроки:\n — {user_data['deadline']}\n"
-        f"🔹 Откуда Вы узнали о нас:\n — {user_data['source']}\n"
-
+        f"🔹 Откуда Вы узнали о нас:\n — {user_data['source']}\n\n"
         f"Заказчик: {message.from_user.full_name} (@{message.from_user.username or 'Без юзернейма'})"
     )
     await message.answer("✅ Ваш заказ на постройку принят!", reply_markup=main_menu)
-
     await state.clear()
+
+
+@router.message(OrderState.waiting_for_typeBuild)
+async def process_type_build(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'type')
+
+
+@router.message(OrderState.waiting_for_versionBuild)
+async def process_version(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'version')
+
+
+@router.message(OrderState.waiting_for_whatToBuild)
+async def process_whattobuild(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'build')
+
+
+@router.message(OrderState.waiting_for_styleOfBuild)
+async def process_style(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'style')
+
+
+@router.message(OrderState.waiting_for_sizeOfBuild)
+async def process_size(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'size')
+
+
+@router.message(OrderState.waiting_for_detalizationOfBuild)
+async def process_detalization(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'detalization')
+
+
+@router.message(OrderState.waiting_for_sezonOfBuild)
+async def process_sezon(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'sezon')
+
+
+@router.message(OrderState.waiting_for_pointsOfBuild)
+async def process_points(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'points')
+
+
+@router.message(OrderState.waiting_for_picturesOfBuild)
+async def process_pictures(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'pictures')
+
+
+@router.message(OrderState.waiting_for_extraInfoBuild)
+async def process_extra(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'extra')
+
+
+@router.message(OrderState.waiting_for_deadlineBuild)
+async def process_deadline(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'deadline')
+
+
+@router.message(OrderState.waiting_for_sourceBuild)
+async def process_source_build(message: types.Message, state: FSMContext):
+    await process_order_step(message, state, 'source')

@@ -8,66 +8,41 @@ from bot.config import GROUP_ID
 
 router = Router()
 
-@router.message(OrderState.waiting_for_namePlugin)
-async def process_name_plugin(message: types.Message, state: FSMContext):
-    await state.update_data(name=message.text)
-    await message.answer("Введите ядро плагина")
-    await state.set_state(OrderState.waiting_for_jarPlugin)
-
-@router.message(OrderState.waiting_for_jarPlugin)
-async def process_version(message: types.Message, state: FSMContext):
-    await state.update_data(jar=message.text)
-    await message.answer("Укажите версию плагина")
-    await state.set_state(OrderState.waiting_for_versionPlugin)
-
-@router.message(OrderState.waiting_for_versionPlugin)
-async def process_socials(message: types.Message, state: FSMContext):
-    await state.update_data(version=message.text)
-    await message.answer("Укажите функционал плагина и какие задачи он должен решать")
-    await state.set_state(OrderState.waiting_for_funcPlugin)
-
-@router.message(OrderState.waiting_for_funcPlugin)
-async def process_colors(message: types.Message, state: FSMContext):
-    await state.update_data(functional=message.text)
-    await message.answer("Укажите, есть ли вспомогательные системы, с которыми должен работать плагин (библиотеки, какие-то смежные плагины)")
-    await state.set_state(OrderState.waiting_for_addonsPlugin)
+order_plugin_steps = {
+    'name': {"question": "Введите ядро плагина", "next_state": OrderState.waiting_for_jarPlugin},
+    'jar': {"question": "Укажите версию плагина", "next_state": OrderState.waiting_for_versionPlugin},
+    'version': {"question": "Укажите функционал плагина и какие задачи он должен решать",
+                "next_state": OrderState.waiting_for_funcPlugin},
+    'functional': {"question": "Укажите, есть ли вспомогательные системы, с которыми должен работать плагин (библиотеки, какие-то смежные плагины)",
+                   "next_state": OrderState.waiting_for_addonsPlugin},
+    'addons': {"question": "Предоставьте примеры плагинов с функционалом наподобие, на которые мы могли бы ориентироваться (при наличии)",
+               "next_state": OrderState.waiting_for_examplesPlugin},
+    'examples': {"question": "Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд, необходимое Вашему проекту",
+                 "next_state": OrderState.waiting_for_extraInfoPlugin},
+    'extrainfo': {"question": "Есть ли у Вас пожелания по поводу сроков?", "next_state": OrderState.waiting_for_deadlinePlugin,
+                  "keyboard": deadline},
+    'deadlines': {"question": "Откуда Вы узнали о нашей студии?", "next_state": OrderState.waiting_for_sourcePlugin,
+                  "keyboard": how_do_you_know_us},
+    'source': {"question": None, "next_state": None}
+}
 
 
-@router.message(OrderState.waiting_for_addonsPlugin)
-async def process_mode(message: types.Message, state: FSMContext):
-    await state.update_data(addons=message.text)
-    await message.answer("Предоставьте примеры плагины с функционалом наподобие, на которые мы могли бы ориентироваться (при наличии)")
-    await state.set_state(OrderState.waiting_for_examplesPlugin)
+async def process_order_plugin_step(message: types.Message, state: FSMContext, field: str):
+    await state.update_data({field: message.text})
+
+    step_info = order_plugin_steps[field]
+    if step_info["question"]:
+        await message.answer(step_info["question"], reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
+
+    if step_info["next_state"]:
+        await state.set_state(step_info["next_state"])
+    else:
+        await complete_plugin_order(message, state)
 
 
-@router.message(OrderState.waiting_for_examplesPlugin)
-async def process_functionality(message: types.Message, state: FSMContext):
-    await state.update_data(examples=message.text)
-    await message.answer("Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд, необходимое Вашему проекту")
-    await state.set_state(OrderState.waiting_for_extraInfoPlugin)
-
-
-@router.message(OrderState.waiting_for_extraInfoPlugin)
-async def process_spawn(message: types.Message, state: FSMContext):
-    await state.update_data(extrainfo=message.text)
-    await message.answer("Есть ли у Вас пожелания по поводу сроков?", reply_markup=deadline)
-    await state.set_state(OrderState.waiting_for_deadlinePlugin)
-
-
-@router.message(OrderState.waiting_for_deadlinePlugin)
-async def process_holograms(message: types.Message, state: FSMContext):
-    await state.update_data(deadlines=message.text)
-    await message.answer("Откуда Вы узнали о нашей студии?", reply_markup=how_do_you_know_us)
-    await state.set_state(OrderState.waiting_for_sourcePlugin)
-
-
-
-@router.message(OrderState.waiting_for_sourcePlugin)
-async def process_source_plugin(message: types.Message, state: FSMContext):
-    await state.update_data(source=message.text)
-
+async def complete_plugin_order(message: types.Message, state: FSMContext):
+    """Завершаем заказ на плагин и отправляем информацию в группу."""
     user_data = await state.get_data()
-
     await bot.send_message(
         GROUP_ID,
         f"📢 Новый заказ на плагин!\n\n"
@@ -83,5 +58,49 @@ async def process_source_plugin(message: types.Message, state: FSMContext):
         f"Заказчик: {message.from_user.full_name} (@{message.from_user.username or 'Без юзернейма'})"
     )
     await message.answer("✅ Ваш заказ на плагин принят!", reply_markup=main_menu)
-
     await state.clear()
+
+
+@router.message(OrderState.waiting_for_namePlugin)
+async def process_name_plugin(message: types.Message, state: FSMContext):
+    await process_order_plugin_step(message, state, 'name')
+
+
+@router.message(OrderState.waiting_for_jarPlugin)
+async def process_jar_plugin(message: types.Message, state: FSMContext):
+    await process_order_plugin_step(message, state, 'jar')
+
+
+@router.message(OrderState.waiting_for_versionPlugin)
+async def process_version_plugin(message: types.Message, state: FSMContext):
+    await process_order_plugin_step(message, state, 'version')
+
+
+@router.message(OrderState.waiting_for_funcPlugin)
+async def process_func_plugin(message: types.Message, state: FSMContext):
+    await process_order_plugin_step(message, state, 'functional')
+
+
+@router.message(OrderState.waiting_for_addonsPlugin)
+async def process_addons_plugin(message: types.Message, state: FSMContext):
+    await process_order_plugin_step(message, state, 'addons')
+
+
+@router.message(OrderState.waiting_for_examplesPlugin)
+async def process_examples_plugin(message: types.Message, state: FSMContext):
+    await process_order_plugin_step(message, state, 'examples')
+
+
+@router.message(OrderState.waiting_for_extraInfoPlugin)
+async def process_extra_plugin(message: types.Message, state: FSMContext):
+    await process_order_plugin_step(message, state, 'extrainfo')
+
+
+@router.message(OrderState.waiting_for_deadlinePlugin)
+async def process_deadline_plugin(message: types.Message, state: FSMContext):
+    await process_order_plugin_step(message, state, 'deadlines')
+
+
+@router.message(OrderState.waiting_for_sourcePlugin)
+async def process_source_plugin(message: types.Message, state: FSMContext):
+    await process_order_plugin_step(message, state, 'source')

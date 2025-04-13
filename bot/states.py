@@ -1,9 +1,12 @@
 from aiogram.fsm.state import State, StatesGroup
 
 class OrderState(StatesGroup):
-    waiting_for_project_type = State()  # добавьте это состояние
+    #main
+    waiting_for_project_type = State()
     waiting_for_category = State()
     waiting_for_po = State()
+
+    #minecraft
     waiting_for_name = State()
     waiting_for_version = State()
     waiting_for_socials = State()
@@ -20,6 +23,8 @@ class OrderState(StatesGroup):
     waiting_for_deadline = State()
     waiting_for_support = State()
     waiting_for_source = State()
+
+    #plugin
     waiting_for_namePlugin = State()
     waiting_for_jarPlugin = State()
     waiting_for_versionPlugin = State()
@@ -30,6 +35,8 @@ class OrderState(StatesGroup):
     waiting_for_deadlinePlugin = State()
     waiting_for_howDouKnowUsPlugin = State()
     waiting_for_sourcePlugin = State()
+
+    #launcher
     waiting_for_nameLauncher = State()
     waiting_for_versionLauncher = State()
     waiting_for_funcLauncher = State()
@@ -41,6 +48,8 @@ class OrderState(StatesGroup):
     waiting_for_deadlineLauncher = State()
     waiting_for_howDouKnowUsLauncher = State()
     waiting_for_sourceLauncher = State()
+
+    #build
     waiting_for_typeBuild = State()
     waiting_for_versionBuild = State()
     waiting_for_whatToBuild = State()
@@ -54,6 +63,8 @@ class OrderState(StatesGroup):
     waiting_for_extraInfoBuild = State()
     waiting_for_deadlineBuild = State()
     waiting_for_sourceBuild = State()
+
+    #site
     waiting_for_nameSite = State()
     waiting_for_siteDomain = State()
     waiting_for_funcSite = State()

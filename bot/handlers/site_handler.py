@@ -8,70 +8,45 @@ from bot.config import GROUP_ID
 
 router = Router()
 
-@router.message(OrderState.waiting_for_nameSite)
-async def process_name_site(message: types.Message, state: FSMContext):
-    await state.update_data(name=message.text)
-    await message.answer("Укажите свой домен (при наличии)")
-    await state.set_state(OrderState.waiting_for_siteDomain)
-
-@router.message(OrderState.waiting_for_siteDomain)
-async def process_domain(message: types.Message, state: FSMContext):
-    await state.update_data(domain=message.text)
-    await message.answer("Укажите какие страницы должны быть на сайте и их описание")
-    await state.set_state(OrderState.waiting_for_layoutSite)
-
-@router.message(OrderState.waiting_for_layoutSite)
-async def process_layout(message: types.Message, state: FSMContext):
-    await state.update_data(layout=message.text)
-    await message.answer("Укажите функционал сайта и какие задачи он должен решать")
-    await state.set_state(OrderState.waiting_for_funcSite)
-
-@router.message(OrderState.waiting_for_funcSite)
-async def process_func(message: types.Message, state: FSMContext):
-    await state.update_data(func=message.text)
-    await message.answer("Укажите, есть ли вспомогательные системы, с которыми должен работать сайт")
-    await state.set_state(OrderState.waiting_for_addonsSite)
-
-@router.message(OrderState.waiting_for_addonsSite)
-async def process_addons(message: types.Message, state: FSMContext):
-    await state.update_data(addons=message.text)
-    await message.answer("Предоставьте примеры сайтов наподобие, на которые мы могли бы ориентироваться (при наличии)")
-    await state.set_state(OrderState.waiting_for_examplesSite)
+order_site_steps = {
+    'name': {"question": "Укажите название сайта", "next_state": OrderState.waiting_for_siteDomain},
+    'domain': {"question": "Укажите свой домен (при наличии)", "next_state": OrderState.waiting_for_layoutSite},
+    'layout': {"question": "Укажите какие страницы должны быть на сайте и их описание",
+               "next_state": OrderState.waiting_for_funcSite},
+    'func': {"question": "Укажите функционал сайта и какие задачи он должен решать",
+             "next_state": OrderState.waiting_for_addonsSite},
+    'addons': {"question": "Укажите, есть ли вспомогательные системы, с которыми должен работать сайт",
+               "next_state": OrderState.waiting_for_examplesSite},
+    'examples': {
+        "question": "Предоставьте примеры сайтов наподобие, на которые мы могли бы ориентироваться (при наличии)",
+        "next_state": OrderState.waiting_for_designSite},
+    'design': {"question": "Предоставьте ссылку на дизайн (при наличии)",
+               "next_state": OrderState.waiting_for_extraInfoSite},
+    'extra': {
+        "question": "Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд, необходимое Вашему проекту",
+        "next_state": OrderState.waiting_for_deadlineSite},
+    'dead': {"question": "Есть ли у Вас пожелания по поводу сроков?", "next_state": OrderState.waiting_for_sourceSite,
+             "keyboard": deadline},
+    'source': {"question": "Откуда Вы узнали о нашей студии?", "next_state": None, "keyboard": how_do_you_know_us}
+}
 
 
-@router.message(OrderState.waiting_for_examplesSite)
-async def process_examples(message: types.Message, state: FSMContext):
-    await state.update_data(examples=message.text)
-    await message.answer("Предоставьте ссылку на дизайн (при наличии)")
-    await state.set_state(OrderState.waiting_for_designSite)
+async def process_order_site_step(message: types.Message, state: FSMContext, field: str):
+    await state.update_data({field: message.text})
 
-@router.message(OrderState.waiting_for_designSite)
-async def process_design(message: types.Message, state: FSMContext):
-    await state.update_data(design=message.text)
-    await message.answer("Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд, необходимое Вашему проекту")
-    await state.set_state(OrderState.waiting_for_extraInfoSite)
+    step_info = order_site_steps[field]
+    if step_info["question"]:
+        await message.answer(step_info["question"], reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
 
-@router.message(OrderState.waiting_for_extraInfoSite)
-async def process_extra(message: types.Message, state: FSMContext):
-    await state.update_data(extra=message.text)
-    await message.answer("Есть ли у Вас пожелания по поводу сроков?", reply_markup=deadline)
-    await state.set_state(OrderState.waiting_for_deadlineSite)
+    if step_info["next_state"]:
+        await state.set_state(step_info["next_state"])
+    else:
+        await complete_site_order(message, state)
 
 
-@router.message(OrderState.waiting_for_deadlineSite)
-async def process_dead(message: types.Message, state: FSMContext):
-    await state.update_data(dead=message.text)
-    await message.answer("Откуда Вы узнали о нашей студии?", reply_markup=how_do_you_know_us)
-    await state.set_state(OrderState.waiting_for_sourceSite)
-
-
-@router.message(OrderState.waiting_for_sourceSite)
-async def process_source_site(message: types.Message, state: FSMContext):
-    await state.update_data(source=message.text)
-
+async def complete_site_order(message: types.Message, state: FSMContext):
+    """Завершаем заказ на сайт и отправляем информацию в группу."""
     user_data = await state.get_data()
-
-    # Сформируем полный текст для отправки
     full_text = (
         f"📢 Новый заказ на сайт!\n\n"
         f"♦️ Название:\n — {user_data['name']}\n"
@@ -87,11 +62,8 @@ async def process_source_site(message: types.Message, state: FSMContext):
         f"Заказчик: {message.from_user.full_name} (@{message.from_user.username or 'Без юзернейма'})"
     )
 
-    # Используем безопасную отправку сообщения
     await safe_send_message(GROUP_ID, full_text)
-
     await message.answer("✅ Ваш заказ на сайт принят!", reply_markup=main_menu)
-
     await state.clear()
 
 
@@ -99,3 +71,54 @@ async def safe_send_message(chat_id: int, text: str):
     max_length = 4096
     for i in range(0, len(text), max_length):
         await bot.send_message(chat_id, text[i:i + max_length])
+
+
+# Обработчики для всех шагов
+@router.message(OrderState.waiting_for_nameSite)
+async def process_name_site(message: types.Message, state: FSMContext):
+    await process_order_site_step(message, state, 'name')
+
+
+@router.message(OrderState.waiting_for_siteDomain)
+async def process_domain(message: types.Message, state: FSMContext):
+    await process_order_site_step(message, state, 'domain')
+
+
+@router.message(OrderState.waiting_for_layoutSite)
+async def process_layout(message: types.Message, state: FSMContext):
+    await process_order_site_step(message, state, 'layout')
+
+
+@router.message(OrderState.waiting_for_funcSite)
+async def process_func(message: types.Message, state: FSMContext):
+    await process_order_site_step(message, state, 'func')
+
+
+@router.message(OrderState.waiting_for_addonsSite)
+async def process_addons(message: types.Message, state: FSMContext):
+    await process_order_site_step(message, state, 'addons')
+
+
+@router.message(OrderState.waiting_for_examplesSite)
+async def process_examples(message: types.Message, state: FSMContext):
+    await process_order_site_step(message, state, 'examples')
+
+
+@router.message(OrderState.waiting_for_designSite)
+async def process_design(message: types.Message, state: FSMContext):
+    await process_order_site_step(message, state, 'design')
+
+
+@router.message(OrderState.waiting_for_extraInfoSite)
+async def process_extra(message: types.Message, state: FSMContext):
+    await process_order_site_step(message, state, 'extra')
+
+
+@router.message(OrderState.waiting_for_deadlineSite)
+async def process_dead(message: types.Message, state: FSMContext):
+    await process_order_site_step(message, state, 'dead')
+
+
+@router.message(OrderState.waiting_for_sourceSite)
+async def process_source_site(message: types.Message, state: FSMContext):
+    await process_order_site_step(message, state, 'source')

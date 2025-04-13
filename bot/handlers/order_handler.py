@@ -69,5 +69,3 @@ async def process_po_category(message: types.Message, state: FSMContext):
 
     else:
         await message.answer("Пожалуйста, выберите категорию.", reply_markup=software_menu)
-
-

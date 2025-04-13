@@ -1,67 +1,44 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-main_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="ℹ️ Информация"), KeyboardButton(text="📝 Заказать")],
-    ],
-    resize_keyboard=True
-)
+# Функция для генерации клавиатуры
+def generate_keyboard(buttons: list) -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text=button) for button in row] for row in buttons],
+        resize_keyboard=True
+    )
 
-info_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="🎨 Портфолио"), KeyboardButton(text="❓FAQ")],
-        [KeyboardButton(text="📞 Контакты"), KeyboardButton(text="⭐️ Отзывы")],
-        [KeyboardButton(text="👩🏻‍💻 Поддержка"), KeyboardButton(text="🌍 Сайт")],
-        [KeyboardButton(text="📝 Заказать")]
-    ],
-    resize_keyboard=True
-)
+# Меню
+main_menu = generate_keyboard([["ℹ️ Информация", "📝 Заказать"]])
 
-project_type_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="🟢 Minecraft")],
-        [KeyboardButton(text="🔵 ПО")]
-    ],
-    resize_keyboard=True
-)
+info_menu = generate_keyboard([
+    ["🎨 Портфолио", "❓FAQ"],
+    ["📞 Контакты", "⭐️ Отзывы"],
+    ["👩🏻‍💻 Поддержка", "🌍 Сайт"],
+    ["📝 Заказать"]
+])
 
-minecraft_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="Лаунчер"), KeyboardButton(text="Сборка")],
-        [KeyboardButton(text="Постройка"), KeyboardButton(text="Плагин")]
-    ],
-    resize_keyboard=True
-)
+project_type_menu = generate_keyboard([["🟢 Minecraft"], ["🔵 ПО"]])
 
-software_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="Сайт"), KeyboardButton(text="Игра")],
-        [KeyboardButton(text="Приложение")]
-    ],
-    resize_keyboard=True
-)
+minecraft_menu = generate_keyboard([
+    ["Лаунчер", "Сборка"],
+    ["Постройка", "Плагин"]
+])
 
-yes_no_menu = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="Да"), KeyboardButton(text="Нет")]
-    ],
-    resize_keyboard=True
-)
+software_menu = generate_keyboard([
+    ["Сайт", "Игра"],
+    ["Приложение"]
+])
 
-how_do_you_know_us = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="ВК"), KeyboardButton(text="Kwork")],
-        [KeyboardButton(text="Fiverr"), KeyboardButton(text="В интернете")],
-        [KeyboardButton(text="Посоветовали")]
-    ],
-    resize_keyboard=True
-)
+yes_no_menu = generate_keyboard([["Да", "Нет"]])
 
-deadline = ReplyKeyboardMarkup(
-    keyboard=[
-        [KeyboardButton(text="Нет"), KeyboardButton(text="Не больше недели")],
-        [KeyboardButton(text="Не больше двух недель"), KeyboardButton(text="Не больше месяца")],
-        [KeyboardButton(text="Не больше трех месяцев")]
-    ],
-    resize_keyboard=True
-)
+how_do_you_know_us = generate_keyboard([
+    ["ВК", "Kwork"],
+    ["Fiverr", "В интернете"],
+    ["Посоветовали"]
+])
+
+deadline = generate_keyboard([
+    ["Нет", "Не больше недели"],
+    ["Не больше двух недель", "Не больше месяца"],
+    ["Не больше трех месяцев"]
+])
