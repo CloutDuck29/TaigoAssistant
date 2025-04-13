@@ -94,3 +94,18 @@ class OrderState(StatesGroup):
     waiting_for_monitoringProblems = State()
     waiting_for_actualizationOfPlugin = State()
     waiting_for_portfolioPlugin = State()
+
+    #teamplugindev
+    waiting_for_fioPlugin = State()
+    waiting_for_birthdatePlugin = State()
+    waiting_for_experiencePlugin = State()
+    waiting_for_devExperience = State()
+    waiting_for_javaKotlin = State()
+    waiting_for_pluginExample = State()
+    waiting_for_pluginOptimization = State()
+    waiting_for_databaseExperience = State()
+    waiting_for_testingMethods = State()
+    waiting_for_pluginCompatibility = State()
+    waiting_for_configFiles = State()
+    waiting_for_pluginInteraction = State()
+    waiting_for_portfolioPluginNew = State()

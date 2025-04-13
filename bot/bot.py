@@ -1,5 +1,5 @@
 from aiogram import Router
-from bot.handlers import main_commands, order_handler, sborka_handler, plugin_handler, launcher_handler, build_handler, site_handler, team_handler
+from bot.orders import main_commands, order_handler, sborka_handler, plugin_handler, launcher_handler, build_handler, site_handler, team_handler
 from bot.forms import sborshik_handler
 
 router = Router()

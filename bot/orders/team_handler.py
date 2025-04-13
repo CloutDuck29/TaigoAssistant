@@ -1,8 +1,7 @@
 from aiogram import types, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import ReplyKeyboardRemove
-from bot.keyboards import project_type_menu, minecraft_menu, software_menu, main_menu, team_menu, team_minecraft_menu, \
-    team_po_menu, team_admin_menu
+from bot.keyboards import project_type_menu, minecraft_menu, software_menu, main_menu, team_menu, team_minecraft_menu, team_po_menu, team_admin_menu
 from bot.states import OrderState
 from bot.loader import bot
 from bot.config import GROUP_ID
@@ -38,9 +37,9 @@ async def process_minecraft_type(message: types.Message, state: FSMContext):
         await state.set_state(OrderState.waiting_for_fio)
 
     elif category == "Разработчик плагинов":
-        await message.answer("📋 Введите свое ФИО", reply_markup=ReplyKeyboardRemove())
+        await message.answer("📋 1Введите свое ФИО", reply_markup=ReplyKeyboardRemove())
         await state.update_data(category=category)
-        await state.set_state(OrderState.waiting_for_fio)
+        await state.set_state(OrderState.waiting_for_fioPlugin)  # Изменено состояние
 
     elif category == "Специалист по постройкам":
         await message.answer("📋 Введите свое ФИО", reply_markup=ReplyKeyboardRemove())
