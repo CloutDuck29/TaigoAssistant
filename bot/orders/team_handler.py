@@ -37,24 +37,18 @@ async def process_minecraft_type(message: types.Message, state: FSMContext):
         await state.set_state(OrderState.waiting_for_fio)
 
     elif category == "Разработчик плагинов":
-        await message.answer("📋 1Введите свое ФИО", reply_markup=ReplyKeyboardRemove())
+        await message.answer("📋 Введите свое ФИО", reply_markup=ReplyKeyboardRemove())
         await state.update_data(category=category)
         await state.set_state(OrderState.waiting_for_fioPlugin)  # Изменено состояние
 
     elif category == "Специалист по постройкам":
-        await message.answer("📋 Введите свое ФИО", reply_markup=ReplyKeyboardRemove())
-        await state.update_data(category=category)
-        await state.set_state(OrderState.waiting_for_fio)
+        await message.answer("Извините, кнопка не работает - обратитесь к @taigo_official", reply_markup=main_menu)
 
     elif category == "Разработчик модов":
-        await message.answer("📋 Введите свое ФИО", reply_markup=ReplyKeyboardRemove())
-        await state.update_data(category=category)
-        await state.set_state(OrderState.waiting_for_fio)
+        await message.answer("Извините, кнопка не работает - обратитесь к @taigo_official", reply_markup=main_menu)
 
     elif category == "Разработчик лаунчеров":
-        await message.answer("📋 Введите свое ФИО", reply_markup=ReplyKeyboardRemove())
-        await state.update_data(category=category)
-        await state.set_state(OrderState.waiting_for_fio)
+        await message.answer("Извините, кнопка не работает - обратитесь к @taigo_official", reply_markup=main_menu)
 
     else:
-        await message.answer("Пожалуйста, выберите категорию.", reply_markup=minecraft_menu)
+        await message.answer("Пожалуйста, выберите категорию.", reply_markup=team_minecraft_menu)

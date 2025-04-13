@@ -26,7 +26,7 @@ order_build_steps = {
 async def process_order_build_step(message: types.Message, state: FSMContext, field: str):
     if message.text.lower() == "/cancel":
         await state.clear()
-        await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
+        await message.answer("🚫 Заполнение анкеты отменено. Вы вернулись в главное меню.", reply_markup=main_menu)
         return
 
     await state.update_data({field: message.text})
@@ -61,7 +61,7 @@ async def complete_build_order(message: types.Message, state: FSMContext):
         f"🔹 Инструменты для диагностики проблем с плагинами:\n — {user_data['monitoringProblems']}\n"
         f"🔹 Поддержка актуальности плагинов:\n — {user_data['actualizationPlugin']}\n"
         f"🔹 Портфолио (ссылки GitHub, Behance и т.д.):\n — {user_data['portfolioPlugin']}\n\n"
-        f"Заказчик: {message.from_user.full_name} (@{message.from_user.username or 'Без юзернейма'})"
+        f"Отправитель: {message.from_user.full_name} (@{message.from_user.username or 'Без юзернейма'})"
     )
     await message.answer("✅ Ваша заявка на вступление в рассмотрении. Ожидайте обратной связи!", reply_markup=main_menu)
     await state.clear()
@@ -69,7 +69,7 @@ async def complete_build_order(message: types.Message, state: FSMContext):
 @router.message(Command("cancel"))
 async def cancel_order_command(message: types.Message, state: FSMContext):
     await state.clear()
-    await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
+    await message.answer("🚫 Заполнение анкеты отменено. Вы вернулись в главное меню.", reply_markup=main_menu)
 
 @router.message(OrderState.waiting_for_fio)
 async def process_fio(message: types.Message, state: FSMContext):

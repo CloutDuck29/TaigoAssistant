@@ -41,7 +41,6 @@ buttons_info = {
     }
 }
 
-# Команда /start
 @router.message(Command("start"))
 async def start_command(message: types.Message):
     await message.answer(
@@ -51,7 +50,6 @@ async def start_command(message: types.Message):
         reply_markup=main_menu
     )
 
-# Обработка кнопок
 @router.message(lambda message: message.text in buttons_info)
 async def handle_button(message: types.Message):
     button_data = buttons_info[message.text]
