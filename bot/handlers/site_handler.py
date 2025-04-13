@@ -5,47 +5,64 @@ from bot.keyboards import minecraft_menu, yes_no_menu, main_menu, how_do_you_kno
 from bot.states import OrderState
 from bot.loader import bot
 from bot.config import GROUP_ID
+from aiogram.filters import Command
 
 router = Router()
 
 order_site_steps = {
-    'name': {"question": "Укажите название сайта", "next_state": OrderState.waiting_for_siteDomain},
-    'domain': {"question": "Укажите свой домен (при наличии)", "next_state": OrderState.waiting_for_layoutSite},
-    'layout': {"question": "Укажите какие страницы должны быть на сайте и их описание",
+    'name': {"question": "Укажите свой домен (при наличии)", "next_state": OrderState.waiting_for_siteDomain},
+    'domain': {"question": "Укажите какие страницы должны быть на сайте и их описание",
+               "next_state": OrderState.waiting_for_layoutSite},
+    'layout': {"question": "Укажите функционал сайта и какие задачи он должен решать",
                "next_state": OrderState.waiting_for_funcSite},
-    'func': {"question": "Укажите функционал сайта и какие задачи он должен решать",
+    'func': {"question": "Укажите, есть ли вспомогательные системы, с которыми должен работать сайт",
              "next_state": OrderState.waiting_for_addonsSite},
-    'addons': {"question": "Укажите, есть ли вспомогательные системы, с которыми должен работать сайт",
-               "next_state": OrderState.waiting_for_examplesSite},
-    'examples': {
+    'addons': {
         "question": "Предоставьте примеры сайтов наподобие, на которые мы могли бы ориентироваться (при наличии)",
-        "next_state": OrderState.waiting_for_designSite},
-    'design': {"question": "Предоставьте ссылку на дизайн (при наличии)",
-               "next_state": OrderState.waiting_for_extraInfoSite},
-    'extra': {
+        "next_state": OrderState.waiting_for_examplesSite},
+    'examples': {"question": "Предоставьте ссылку на дизайн (при наличии)",
+                 "next_state": OrderState.waiting_for_designSite},
+    'design': {
         "question": "Здесь Вы можете описать что-то дополнительное, что было упущено в нашей форме на Ваш взгляд, необходимое Вашему проекту",
-        "next_state": OrderState.waiting_for_deadlineSite},
-    'dead': {"question": "Есть ли у Вас пожелания по поводу сроков?", "next_state": OrderState.waiting_for_sourceSite,
-             "keyboard": deadline},
-    'source': {"question": "Откуда Вы узнали о нашей студии?", "next_state": None, "keyboard": how_do_you_know_us}
+        "next_state": OrderState.waiting_for_extraInfoSite},
+    'extra': {"question": "Есть ли у Вас пожелания по поводу сроков?",
+              "next_state": OrderState.waiting_for_deadlineSite, "keyboard": deadline},
+    'dead': {"question": "Откуда Вы узнали о нашей студии?", "next_state": OrderState.waiting_for_sourceSite,
+             "keyboard": how_do_you_know_us},
+    'source': {"question": None, "next_state": None}
 }
 
-
+## Универсальная функция для обработки шагов заказа на сайт
 async def process_order_site_step(message: types.Message, state: FSMContext, field: str):
+    # Проверка на команду /cancel на каждом шаге
+    if message.text.lower() == "/cancel":
+        await state.clear()
+        await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
+        return
+
+    # Обновляем данные в состоянии
     await state.update_data({field: message.text})
 
     step_info = order_site_steps[field]
     if step_info["question"]:
-        await message.answer(step_info["question"], reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
+        # Если это шаг с названием сайта, добавляем уведомление об отмене заказа
+        text = step_info["question"]
+        if field == "name":  # Проверка на шаг с названием сайта
+            text += "\n\n❗ Если хотите отменить заказ — введите /cancel"
 
+        # Отправляем сообщение с вопросом и кнопками
+        await message.answer(text, reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
+
+    # Переход к следующему шагу, если он существует
     if step_info["next_state"]:
         await state.set_state(step_info["next_state"])
     else:
         await complete_site_order(message, state)
 
 
+
+
 async def complete_site_order(message: types.Message, state: FSMContext):
-    """Завершаем заказ на сайт и отправляем информацию в группу."""
     user_data = await state.get_data()
     full_text = (
         f"📢 Новый заказ на сайт!\n\n"
@@ -58,7 +75,7 @@ async def complete_site_order(message: types.Message, state: FSMContext):
         f"♦️ Дизайн:\n — {user_data['design']}\n"
         f"♦️ Дополнительная информация:\n — {user_data['extra']}\n"
         f"♦️ Сроки:\n — {user_data['dead']}\n"
-        f"♦️ Откуда узнали о нас:\n — {user_data['source']}\n"
+        f"♦️ Откуда узнали о нас:\n — {user_data['source']}\n\n"
         f"Заказчик: {message.from_user.full_name} (@{message.from_user.username or 'Без юзернейма'})"
     )
 
@@ -73,7 +90,14 @@ async def safe_send_message(chat_id: int, text: str):
         await bot.send_message(chat_id, text[i:i + max_length])
 
 
-# Обработчики для всех шагов
+# Хендлер для отмены
+@router.message(Command("cancel"))
+async def cancel_order_command(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
+
+
+# Хендлеры для обработки шагов заказа
 @router.message(OrderState.waiting_for_nameSite)
 async def process_name_site(message: types.Message, state: FSMContext):
     await process_order_site_step(message, state, 'name')

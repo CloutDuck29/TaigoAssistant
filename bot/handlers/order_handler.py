@@ -62,10 +62,10 @@ async def process_po_category(message: types.Message, state: FSMContext):
         await state.set_state(OrderState.waiting_for_nameSite)
 
     elif category == "Игра":
-        await message.answer("Извините, кнопка не работает - обратитесь к @taigo_official", reply_markup=ReplyKeyboardRemove())
+        await message.answer("Извините, кнопка не работает - обратитесь к @taigo_official", reply_markup=main_menu)
 
     elif category == "Приложение":
-        await message.answer("Извините, кнопка не работает - обратитесь к @taigo_official", reply_markup=ReplyKeyboardRemove())
+        await message.answer("Извините, кнопка не работает - обратитесь к @taigo_official", reply_markup=main_menu)
 
     else:
         await message.answer("Пожалуйста, выберите категорию.", reply_markup=software_menu)

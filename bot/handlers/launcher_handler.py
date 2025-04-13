@@ -5,6 +5,7 @@ from bot.keyboards import minecraft_menu, yes_no_menu, main_menu, how_do_you_kno
 from bot.states import OrderState
 from bot.loader import bot
 from bot.config import GROUP_ID
+from aiogram.filters import Command
 
 router = Router()
 
@@ -32,8 +33,14 @@ async def process_order_launcher_step(message: types.Message, state: FSMContext,
     await state.update_data({field: message.text})
 
     step_info = order_launcher_steps[field]
+
     if step_info["question"]:
-        await message.answer(step_info["question"], reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
+        text = step_info["question"]
+
+        if field == "name":
+            text += "\n\n❗ Если хотите отменить заказ — введите /cancel"
+
+        await message.answer(text, reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
 
     if step_info["next_state"]:
         await state.set_state(step_info["next_state"])
@@ -60,6 +67,11 @@ async def complete_launcher_order(message: types.Message, state: FSMContext):
     )
     await message.answer("✅ Ваш заказ на лаунчер принят!", reply_markup=main_menu)
     await state.clear()
+
+@router.message(Command("cancel"))
+async def cancel_order_command(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
 
 
 @router.message(OrderState.waiting_for_nameLauncher)
@@ -105,3 +117,5 @@ async def process_deadline_launcher(message: types.Message, state: FSMContext):
 @router.message(OrderState.waiting_for_sourceLauncher)
 async def process_source_launcher(message: types.Message, state: FSMContext):
     await process_order_launcher_step(message, state, 'source')
+
+

@@ -5,6 +5,8 @@ from bot.states import OrderState
 from bot.loader import bot
 from aiogram.types import ReplyKeyboardRemove
 from bot.config import GROUP_ID
+from aiogram.filters import Command
+
 
 router = Router()
 
@@ -41,8 +43,14 @@ async def process_order_step(message: types.Message, state: FSMContext, field: s
     await state.update_data({field: message.text})
 
     step_info = order_steps[field]
+
     if step_info["question"]:
-        await message.answer(step_info["question"], reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
+        text = step_info["question"]
+
+        if field == "type":
+            text += "\n\n❗ Если хотите отменить заказ — введите /cancel"
+
+        await message.answer(text, reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
 
     if step_info["next_state"]:
         await state.set_state(step_info["next_state"])
@@ -51,7 +59,6 @@ async def process_order_step(message: types.Message, state: FSMContext, field: s
 
 
 async def complete_order(message: types.Message, state: FSMContext):
-    """Завершаем заказ и отправляем информацию в группу."""
     user_data = await state.get_data()
     await bot.send_message(
         GROUP_ID,
@@ -72,6 +79,11 @@ async def complete_order(message: types.Message, state: FSMContext):
     )
     await message.answer("✅ Ваш заказ на постройку принят!", reply_markup=main_menu)
     await state.clear()
+
+@router.message(Command("cancel"))
+async def cancel_order_command(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
 
 
 @router.message(OrderState.waiting_for_typeBuild)
@@ -132,3 +144,8 @@ async def process_deadline(message: types.Message, state: FSMContext):
 @router.message(OrderState.waiting_for_sourceBuild)
 async def process_source_build(message: types.Message, state: FSMContext):
     await process_order_step(message, state, 'source')
+
+
+
+
+

@@ -5,6 +5,8 @@ from bot.keyboards import minecraft_menu, yes_no_menu, main_menu, how_do_you_kno
 from bot.states import OrderState
 from bot.loader import bot
 from bot.config import GROUP_ID
+from aiogram.filters import Command
+
 
 router = Router()
 
@@ -32,7 +34,12 @@ async def process_order_plugin_step(message: types.Message, state: FSMContext, f
 
     step_info = order_plugin_steps[field]
     if step_info["question"]:
-        await message.answer(step_info["question"], reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
+        text = step_info["question"]
+
+        if field == "name":
+            text += "\n\n❗ Если хотите отменить заказ — введите /cancel"
+
+        await message.answer(text, reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
 
     if step_info["next_state"]:
         await state.set_state(step_info["next_state"])
@@ -41,7 +48,6 @@ async def process_order_plugin_step(message: types.Message, state: FSMContext, f
 
 
 async def complete_plugin_order(message: types.Message, state: FSMContext):
-    """Завершаем заказ на плагин и отправляем информацию в группу."""
     user_data = await state.get_data()
     await bot.send_message(
         GROUP_ID,
@@ -59,6 +65,11 @@ async def complete_plugin_order(message: types.Message, state: FSMContext):
     )
     await message.answer("✅ Ваш заказ на плагин принят!", reply_markup=main_menu)
     await state.clear()
+
+@router.message(Command("cancel"))
+async def cancel_order_command(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
 
 
 @router.message(OrderState.waiting_for_namePlugin)
@@ -104,3 +115,5 @@ async def process_deadline_plugin(message: types.Message, state: FSMContext):
 @router.message(OrderState.waiting_for_sourcePlugin)
 async def process_source_plugin(message: types.Message, state: FSMContext):
     await process_order_plugin_step(message, state, 'source')
+
+
