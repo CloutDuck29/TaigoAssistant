@@ -49,7 +49,6 @@ async def process_order_launcher_step(message: types.Message, state: FSMContext,
 
 
 async def complete_launcher_order(message: types.Message, state: FSMContext):
-    """Завершаем заказ на лаунчер и отправляем информацию в группу."""
     user_data = await state.get_data()
     await bot.send_message(
         GROUP_ID,

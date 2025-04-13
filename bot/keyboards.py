@@ -1,13 +1,11 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-# Функция для генерации клавиатуры
 def generate_keyboard(buttons: list) -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[[KeyboardButton(text=button) for button in row] for row in buttons],
         resize_keyboard=True
     )
 
-# Меню
 main_menu = generate_keyboard([["ℹ️ Информация", "📝 Заказать"]])
 
 info_menu = generate_keyboard([

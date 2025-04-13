@@ -31,7 +31,6 @@ order_build_steps = {
 }
 
 async def process_order_build_step(message: types.Message, state: FSMContext, field: str):
-    # Проверка на команду /cancel на каждом шаге
     if message.text.lower() == "/cancel":
         await state.clear()
         await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
@@ -79,14 +78,12 @@ async def complete_build_order(message: types.Message, state: FSMContext):
     await message.answer("✅ Ваш заказ на сборку принят!", reply_markup=main_menu)
     await state.clear()
 
-# Хендлер для отмены
 @router.message(Command("cancel"))
 async def cancel_order_command(message: types.Message, state: FSMContext):
     await state.clear()
     await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
 
 
-# Хендлеры для обработки шагов заказа
 @router.message(OrderState.waiting_for_name)
 async def process_name(message: types.Message, state: FSMContext):
     await process_order_build_step(message, state, 'name')

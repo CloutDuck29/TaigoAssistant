@@ -32,34 +32,26 @@ order_site_steps = {
     'source': {"question": None, "next_state": None}
 }
 
-## Универсальная функция для обработки шагов заказа на сайт
 async def process_order_site_step(message: types.Message, state: FSMContext, field: str):
-    # Проверка на команду /cancel на каждом шаге
     if message.text.lower() == "/cancel":
         await state.clear()
         await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
         return
 
-    # Обновляем данные в состоянии
     await state.update_data({field: message.text})
 
     step_info = order_site_steps[field]
     if step_info["question"]:
-        # Если это шаг с названием сайта, добавляем уведомление об отмене заказа
         text = step_info["question"]
-        if field == "name":  # Проверка на шаг с названием сайта
+        if field == "name":
             text += "\n\n❗ Если хотите отменить заказ — введите /cancel"
 
-        # Отправляем сообщение с вопросом и кнопками
         await message.answer(text, reply_markup=step_info.get("keyboard", ReplyKeyboardRemove()))
 
-    # Переход к следующему шагу, если он существует
     if step_info["next_state"]:
         await state.set_state(step_info["next_state"])
     else:
         await complete_site_order(message, state)
-
-
 
 
 async def complete_site_order(message: types.Message, state: FSMContext):
@@ -90,14 +82,12 @@ async def safe_send_message(chat_id: int, text: str):
         await bot.send_message(chat_id, text[i:i + max_length])
 
 
-# Хендлер для отмены
 @router.message(Command("cancel"))
 async def cancel_order_command(message: types.Message, state: FSMContext):
     await state.clear()
     await message.answer("🚫 Заказ отменён. Вы вернулись в главное меню.", reply_markup=main_menu)
 
 
-# Хендлеры для обработки шагов заказа
 @router.message(OrderState.waiting_for_nameSite)
 async def process_name_site(message: types.Message, state: FSMContext):
     await process_order_site_step(message, state, 'name')
