@@ -76,3 +76,21 @@ class OrderState(StatesGroup):
     waiting_for_extraInfoSite = State()
     waiting_for_deadlineSite = State()
     waiting_for_sourceSite = State()
+
+    #teamcommon
+    waiting_for_teamType= State()
+    waiting_for_minecraftType= State()
+    waiting_for_devType= State()
+    waiting_for_fio = State()
+
+    #teamsborshik
+    waiting_for_birthdate = State()
+    waiting_for_experience = State()
+    waiting_for_experienceInServers = State()
+    waiting_for_choosePlugin = State()
+    waiting_for_problemsInPlugins = State()
+    waiting_for_optimizationPluginsOnServer = State()
+    waiting_for_tasksOnMigrationsAndUpd = State()
+    waiting_for_monitoringProblems = State()
+    waiting_for_actualizationOfPlugin = State()
+    waiting_for_portfolioPlugin = State()
