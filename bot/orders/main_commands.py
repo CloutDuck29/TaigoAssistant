@@ -32,9 +32,6 @@ buttons_info = {
                 "📖 https://vk.com/topic-166798462_47602007",
         "parse_mode": "HTML"
     },
-    "👩🏻‍💻 Поддержка": {
-        "text": "🆘 Нужна помощь? Напишите нам в поддержку: @taigo_official"
-    },
     "🌍 Сайт": {
         "text": "🌍 <b>Наш сайт:</b> https://taigo.xyz",
         "parse_mode": "HTML"
@@ -57,4 +54,12 @@ async def handle_button(message: types.Message):
         button_data["text"],
         parse_mode=button_data.get("parse_mode", None),
         reply_markup=button_data.get("reply_markup", None)
+    )
+
+@router.message(lambda message: message.text == "🏚 В главное меню")
+async def back_to_main(message: types.Message):
+    # если FSM не используется, просто отправляем меню
+    await message.answer(
+        "Вы вернулись в главное меню. Чем могу помочь?",
+        reply_markup=main_menu
     )
